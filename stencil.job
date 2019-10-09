@@ -1,27 +1,31 @@
 #!/bin/bash
-
-#SBATCH --nodes 1
-#SBATCH --ntasks-per-node 1
-#SBATCH --partition veryshort
+#SBATCH --job-name hk16187cw1
+#SBATCH -o stencil.out
+#SBATCH -p veryshort
+#SBATCH -A COMS30005
 #SBATCH --reservation COMS30005
-#SBATCH --account COMS30005
-#SBATCH --job-name stencil
-#SBATCH --time 00:15:00
-#SBATCH --output stencil.out
-#SBATCH --exclusive
+#SBATCH --nodes 1
+#SBATCH --ntasks-per-node 16
+#SBATCH -t 00:05:00
 
-# Print some information about the job
-echo "Running on host $(hostname)"
-echo "Time is $(date)"
-echo "Directory is $(pwd)"
-echo "Slurm job ID is $SLURM_JOB_ID"
-echo
-echo "This job runs on the following machines:"
-echo "$SLURM_JOB_NODELIST" | uniq
-echo
+echo 'running a job'
 
-# Enable using `srun` with Intel MPI
-export I_MPI_PMI_LIBRARY=/usr/lib64/libpmi.so
+make
+echo starting job
+echo below  1024 file
+./stencil 1024 1024 100
+echo 1024 python check result below
+python check.py --ref-stencil-file stencil_1024_1024_100.pgm --stencil-file stencil.pgm
+echo below 4096 file
+./stencil 4096 4096 100
+echo 4096 python check result below
+python check.py --ref-stencil-file stencil_4096_4096_100.pgm --stencil-file stencil.pgm
 
-# Run the executable
-srun ./stencil 1024 1024 100
+echo below  8000 file
+./stencil 8000 8000 100
+echo 8000 python check result below
+python check.py --ref-stencil-file stencil_8000_8000_100.pgm --stencil-file stencil.pgm
+
+echo all fone
+
+
